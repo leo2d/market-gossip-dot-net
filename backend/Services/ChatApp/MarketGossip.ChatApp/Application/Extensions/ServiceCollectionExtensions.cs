@@ -1,5 +1,9 @@
 using System.Text;
+using MarketGossip.ChatApp.Application.Features.Chat.EventHandling;
 using MarketGossip.ChatApp.Infrastructure.Data;
+using MarketGossip.Shared.Events;
+using MarketGossip.Shared.IntegrationBus.Contracts;
+using MarketGossip.Shared.IntegrationBus.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +53,38 @@ public static class ServiceCollectionExtensions
                 };
             });
 
+        return services;
+    }
+
+    public static IServiceCollection SetupIntegrationBus(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddRabbitMqClient(configuration)
+            .AddIntegrationBusConsumer()
+            .AddIntegrationBusPublisher();
+
+        return services;
+    }
+
+    public static IServiceCollection SetupIntegrationEventHandlers(this IServiceCollection services)
+    {
+        services.AddTransient<IIntegrationEventHandler<StockQuoteProcessed>, StockQuoteProcessedEventHandler>();
+
+        return services;
+    }
+
+    public static IServiceCollection SetupCorsPolicy(this IServiceCollection services,
+        string policyName, IConfiguration configuration)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(policyName, policy =>
+            {
+                policy.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithOrigins(configuration["Cors:ChatOrigin"])
+                    .AllowCredentials();
+            });
+        });
         return services;
     }
 }

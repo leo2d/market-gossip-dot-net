@@ -1,6 +1,6 @@
 using MarketGossip.Shared.Events;
 
-namespace MarketGossip.Shared.ServiceBus;
+namespace MarketGossip.Shared.IntegrationBus.Contracts;
 
 public interface IIntegrationEventHandler<in TEvent>
     where TEvent : IntegrationEvent

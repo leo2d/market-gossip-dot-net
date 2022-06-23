@@ -1,4 +1,4 @@
-namespace MarketGossip.Shared.Options;
+namespace MarketGossip.Shared.IntegrationBus.Options;
 
 public record RabbitMqConfig
 {

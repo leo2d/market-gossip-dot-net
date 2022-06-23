@@ -1,25 +1,25 @@
 using MarketGossip.IntegrationWorkers;
 using MarketGossip.IntegrationWorkers.EventHandling;
 using MarketGossip.Shared.Events;
-using MarketGossip.Shared.Extensions;
-using MarketGossip.Shared.ServiceBus;
+using MarketGossip.Shared.IntegrationBus.Contracts;
+using MarketGossip.Shared.IntegrationBus.Extensions;
 
-IConfiguration? configuration = null;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((builderContext, services) =>
     {
-        configuration = builderContext.Configuration;
+        //ATENTION: always add the workers first, then the rest
+        services.AddHostedService<Worker>();
+
+        var configuration = builderContext.Configuration;
+
         services.AddTransient<IIntegrationEventHandler<StockQuoteRequested>, StockQuoteRequestedEventHandler>();
         services.AddTransient<IStooqService, StooqService>();
 
-        services.AddHostedService<Worker>();
-
-        services.SetupIntegrationBus(configuration);
+        services.AddRabbitMqClient(configuration)
+            .AddIntegrationBusConsumer()
+            .AddIntegrationBusPublisher();
     })
     .Build();
-
-// var eventHandler = host.Services.GetRequiredService<IntegrationEventHandler>();
-// eventHandler.StartListening<StockQuoteRequested>(configuration!["EventQueues:StockQuoteRequestedQueue"]);
 
 await host.RunAsync();

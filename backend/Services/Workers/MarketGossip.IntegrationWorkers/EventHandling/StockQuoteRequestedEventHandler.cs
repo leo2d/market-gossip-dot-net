@@ -1,35 +1,36 @@
 using MarketGossip.Shared.Events;
-using MarketGossip.Shared.ServiceBus;
+using MarketGossip.Shared.IntegrationBus.Contracts;
 
 namespace MarketGossip.IntegrationWorkers.EventHandling;
 
-public interface blabla : IIntegrationEventHandler<StockQuoteRequested>
-{
-}
-
 public class StockQuoteRequestedEventHandler : IIntegrationEventHandler<StockQuoteRequested>
 {
-    private readonly IntegrationEventHandler _integrationBus;
+    private readonly IIntegrationBusPublisher _integrationBusPublisher;
     private readonly IConfiguration _configuration;
+    private readonly IStooqService _stooqService;
 
     public StockQuoteRequestedEventHandler(
-        // IntegrationEventHandler integrationBus,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IIntegrationBusPublisher integrationBusPublisher,
+        IStooqService stooqService)
     {
-        // _integrationBus = integrationBus;
         _configuration = configuration;
+        _integrationBusPublisher = integrationBusPublisher;
+        _stooqService = stooqService;
     }
 
     public async Task Handle(StockQuoteRequested @event)
     {
+        var result = await _stooqService.GetStockInfoAsCsv(@event.Symbol);
+
         var eventResult = new StockQuoteProcessed
         {
-            Symbol = "test from worker",
+            Symbol = @event.Symbol,
             QuoteValue = 9999
         };
 
         var queue = _configuration["EventQueues:StockQuoteProcessedQueue"];
 
-        // await _integrationBus.PublishAsync(queue, eventResult);
+        await _integrationBusPublisher.PublishAsync(queue, eventResult);
     }
 }

@@ -1,32 +1,27 @@
-using MarketGossip.IntegrationWorkers.EventHandling;
 using MarketGossip.Shared.Events;
-using MarketGossip.Shared.ServiceBus;
+using MarketGossip.Shared.IntegrationBus.Contracts;
 
 namespace MarketGossip.IntegrationWorkers;
 
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly IntegrationEventHandler _integrationEventHandler;
+    private readonly IIntegrationBusConsumer _integrationBusConsumer;
 
-    IServiceProvider _serviceProvider;
-
-    public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger,
-        IntegrationEventHandler integrationEventHandler)
+    public Worker(ILogger<Worker> logger, IIntegrationBusConsumer integrationBusConsumer)
     {
         _logger = logger;
-        _integrationEventHandler = integrationEventHandler;
-
-        _serviceProvider = serviceProvider;
+        _integrationBusConsumer = integrationBusConsumer;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _integrationEventHandler.StartListening<StockQuoteRequested>("stock-quote-requested");
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            _integrationBusConsumer.StartListening<StockQuoteRequested>("stock-quote-requested");
+
+            _logger.LogInformation("Worker running at: {Time}", DateTimeOffset.Now);
+
             await Task.Delay(1000, stoppingToken);
         }
     }

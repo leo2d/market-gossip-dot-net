@@ -1,38 +1,28 @@
+using MarketGossip.ChatApp.Application.Features.Chat.Models;
 using MarketGossip.ChatApp.Helpers;
 using MarketGossip.Shared.Events;
 using MarketGossip.Shared.Extensions;
-using MarketGossip.Shared.ServiceBus;
+using MarketGossip.Shared.IntegrationBus.Contracts;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
 namespace MarketGossip.ChatApp.Application.Features.Chat;
 
-public record ChatMessage
-{
-    public string Id { get; init; }
-    public string Author { get; init; }
-    public string Text { get; init; }
-    public DateTime SentAt { get; set; }
-
-    public string? RoomId { get; set; }
-}
-
 public interface IChatClient
 {
     Task ReceiveMessage(ChatMessage message);
-    Task ReceiveCommand(ChatMessage message);
 }
 
 public class ChatHub : Hub<IChatClient>
 {
     private const string BotName = "Mkt Gossip BOT";
     private readonly IMediator _mediator;
-    private readonly IIntegrationBus _integrationBus;
+    private readonly IIntegrationBusPublisher _integrationBusPublisher;
 
-    public ChatHub(IMediator mediator, IIntegrationBus integrationBus)
+    public ChatHub(IMediator mediator, IIntegrationBusPublisher integrationBusPublisher)
     {
         _mediator = mediator;
-        _integrationBus = integrationBus;
+        _integrationBusPublisher = integrationBusPublisher;
     }
 
     public async Task SendMessage(ChatMessage message)
@@ -60,28 +50,10 @@ public class ChatHub : Hub<IChatClient>
 
         var requestedEvent = new StockQuoteRequested {Symbol = stockCode!, RoomId = message.RoomId};
 
-        await _integrationBus.PublishAsync("stock-quote-requested", requestedEvent);
+        await _integrationBusPublisher.PublishAsync("stock-quote-requested", requestedEvent);
 
         await Clients.All.ReceiveMessage(
             CreateBotMessage("Command Received, I'll be back soon with the results . . ."));
-
-        // using var client = new HttpClient();
-        //
-        // var validCodes = new[] {"meta.us", "msft.us", "tsla.us", "amzn.us", "googl.us"};
-        // var tempCode = validCodes.First();
-        // var url = $"https://stooq.com/q/l/?s={tempCode}&f=sd2t2ohlcv&h&e=csv";
-        //
-        // var response = await client.GetStringAsync(url);
-        //
-        // var values = CsvHelper.GetFirstLineValuesAsArray(response);
-        //
-        // var info = MountStockInfo(values);
-        // if (info is not null)
-        // {
-        //     var msg = botMessage with {Text = $"{info.Symbol} quote is ${info.Close} per share"};
-        //
-        //     await Clients.All.ReceiveMessage(msg);
-        // }
     }
 
     private static ChatMessage CreateBotMessage(string text) => new()
