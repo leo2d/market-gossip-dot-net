@@ -9,13 +9,14 @@ public class StooqService : IStooqService
 {
     public async Task<string> GetStockInfoAsCsv(string stockCode)
     {
-        var url = $"https://stooq.com/q/l/?s={stockCode}&f=sd2t2ohlcv&h&e=csv";
-
-        using var client = new HttpClient();
-
-        var response = await client.GetStringAsync(url);
-
-        return response;
+        return await Task.FromResult(string.Empty);
+        // var url = $"https://stooq.com/q/l/?s={stockCode}&f=sd2t2ohlcv&h&e=csv";
+        //
+        // using var client = new HttpClient();
+        //
+        // var response = await client.GetStringAsync(url);
+        //
+        // return response;
 
         // var info = CsvUtils.ParseFromString(response);
         //
