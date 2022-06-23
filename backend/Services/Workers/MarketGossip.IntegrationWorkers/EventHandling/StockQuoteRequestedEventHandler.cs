@@ -1,20 +1,23 @@
+using MarketGossip.IntegrationWorkers.Options;
 using MarketGossip.Shared.Events;
 using MarketGossip.Shared.IntegrationBus.Contracts;
+using Microsoft.Extensions.Options;
 
 namespace MarketGossip.IntegrationWorkers.EventHandling;
 
 public class StockQuoteRequestedEventHandler : IIntegrationEventHandler<StockQuoteRequested>
 {
     private readonly IIntegrationBusPublisher _integrationBusPublisher;
-    private readonly IConfiguration _configuration;
     private readonly IStooqService _stooqService;
+    private readonly EventQueuesConfig _queuesConfig;
 
     public StockQuoteRequestedEventHandler(
-        IConfiguration configuration,
         IIntegrationBusPublisher integrationBusPublisher,
-        IStooqService stooqService)
+        IStooqService stooqService,
+        IOptions<EventQueuesConfig> queuesConfigOptions)
     {
-        _configuration = configuration;
+        _queuesConfig = queuesConfigOptions?.Value ?? throw new ArgumentNullException(nameof(queuesConfigOptions));
+
         _integrationBusPublisher = integrationBusPublisher;
         _stooqService = stooqService;
     }
@@ -29,8 +32,6 @@ public class StockQuoteRequestedEventHandler : IIntegrationEventHandler<StockQuo
             QuoteValue = 9999
         };
 
-        var queue = _configuration["EventQueues:StockQuoteProcessedQueue"];
-
-        await _integrationBusPublisher.PublishAsync(queue, eventResult);
+        await _integrationBusPublisher.PublishAsync(_queuesConfig.StockQuoteProcessed, eventResult);
     }
 }

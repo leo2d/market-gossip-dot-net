@@ -6,6 +6,7 @@ using MediatR;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+builder.Services.SetupConfigurations(configuration);
 builder.Services.SetupDatabase(configuration);
 
 builder.Services.SetupIdentity(configuration);

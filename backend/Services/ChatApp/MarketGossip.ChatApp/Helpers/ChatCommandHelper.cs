@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace MarketGossip.ChatApp.Helpers;
 
-public class ChatBotCommandHelper
+public class ChatCommandHelper
 {
     public static string GetCommandFromMessage(string message)
     {

@@ -1,5 +1,6 @@
 using System.Text;
 using MarketGossip.ChatApp.Application.Features.Chat.EventHandling;
+using MarketGossip.ChatApp.Application.Options;
 using MarketGossip.ChatApp.Infrastructure.Data;
 using MarketGossip.Shared.Events;
 using MarketGossip.Shared.IntegrationBus.Contracts;
@@ -16,7 +17,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection SetupDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(configuration.GetConnectionString("marketShareAppDb")));
+            options.UseSqlite(configuration.GetConnectionString("MarketGossipAppDb")));
 
         return services;
     }
@@ -85,6 +86,15 @@ public static class ServiceCollectionExtensions
                     .AllowCredentials();
             });
         });
+        return services;
+    }
+
+    public static IServiceCollection SetupConfigurations(this IServiceCollection services, IConfiguration configuration)
+    {
+        var eventQueuesSection = configuration.GetSection(EventQueuesConfig.Section);
+
+        services.Configure<EventQueuesConfig>(eventQueuesSection);
+
         return services;
     }
 }
