@@ -1,24 +1,30 @@
 using System.Text;
+using MarketGossip.Shared.Events;
 using MarketGossip.Shared.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
-namespace MarketGossip.ChatApp;
+namespace MarketGossip.Shared.ServiceBus;
 
-public interface IEventSender
+public interface IIntegrationBus
 {
-    Task SendAsync(string queue, object @event);
+    Task PublishAsync<TEvent>(string queue, TEvent @event) where TEvent : IntegrationEvent;
 }
 
-public class EventSender : IEventSender
+public class IntegrationBus : IIntegrationBus
 {
+    private readonly ILogger<IntegrationBus> _logger;
     private readonly IConfiguration _configuration;
 
-    public EventSender(IConfiguration configuration)
+    public IntegrationBus(IConfiguration configuration,
+        ILogger<IntegrationBus> logger)
     {
         _configuration = configuration;
+        _logger = logger;
     }
 
-    public Task SendAsync(string queue, object @event)
+    public Task PublishAsync<TEvent>(string queue, TEvent @event) where TEvent : IntegrationEvent
     {
         var factory = new ConnectionFactory
         {

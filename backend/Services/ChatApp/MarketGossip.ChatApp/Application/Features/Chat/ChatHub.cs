@@ -1,6 +1,7 @@
 using MarketGossip.ChatApp.Helpers;
 using MarketGossip.Shared.Events;
 using MarketGossip.Shared.Extensions;
+using MarketGossip.Shared.ServiceBus;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -26,12 +27,12 @@ public class ChatHub : Hub<IChatClient>
 {
     private const string BotName = "Mkt Gossip BOT";
     private readonly IMediator _mediator;
-    private readonly IEventSender _eventSender;
+    private readonly IIntegrationBus _integrationBus;
 
-    public ChatHub(IMediator mediator, IEventSender eventSender)
+    public ChatHub(IMediator mediator, IIntegrationBus integrationBus)
     {
         _mediator = mediator;
-        _eventSender = eventSender;
+        _integrationBus = integrationBus;
     }
 
     public async Task SendMessage(ChatMessage message)
@@ -59,7 +60,7 @@ public class ChatHub : Hub<IChatClient>
 
         var requestedEvent = new StockQuoteRequested {Symbol = stockCode!, RoomId = message.RoomId};
 
-        await _eventSender.SendAsync("stock-quote-requested", requestedEvent);
+        await _integrationBus.PublishAsync("stock-quote-requested", requestedEvent);
 
         await Clients.All.ReceiveMessage(
             CreateBotMessage("Command Received, I'll be back soon with the results . . ."));
