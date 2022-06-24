@@ -1,6 +1,6 @@
 namespace MarketGossip.ChatApp.Domain.StockAgg;
 
-public class StockInfo
+public class Stock
 {
     public string? Symbol { get; init; }
     public string? Date { get; init; }

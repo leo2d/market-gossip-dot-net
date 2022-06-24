@@ -22,14 +22,30 @@ public class StockQuoteProcessedEventHandler : IIntegrationEventHandler<StockQuo
     {
         _logger.LogInformation("Stock quote processed {StockCode}", @event.Symbol);
 
-        var message = new ChatMessage
+        var message = CreateResponseMessage(@event);
+
+        await _hubContext.Clients.All.ReceiveMessage(message);
+    }
+
+    private static ChatMessage CreateResponseMessage(StockQuoteProcessed @event)
+    {
+        if (!@event.Success || @event.StockInfo is null)
+        {
+            return new ChatMessage
+            {
+                Author = AppConstants.ChatBotName,
+                SentAt = DateTime.Now,
+                Id = Guid.NewGuid().ToString(),
+                Text = $"It was not possible to process the the StockCode {@event.Symbol}"
+            };
+        }
+
+        return new ChatMessage
         {
             Author = AppConstants.ChatBotName,
             SentAt = DateTime.Now,
             Id = Guid.NewGuid().ToString(),
-            Text = $"{@event.Symbol} quote is ${@event.QuoteValue} per share"
+            Text = $"{@event.Symbol} quote is ${@event.StockInfo.GetQuoteValue()} per share"
         };
-
-        await _hubContext.Clients.All.ReceiveMessage(message);
     }
 }

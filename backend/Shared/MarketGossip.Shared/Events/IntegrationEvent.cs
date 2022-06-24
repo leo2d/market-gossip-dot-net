@@ -2,5 +2,6 @@ namespace MarketGossip.Shared.Events;
 
 public abstract record IntegrationEvent()
 {
-    public DateTime CreatedAt { get; } = DateTime.Now;
+    public string Id { get; init; } = Guid.NewGuid().ToString();
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
 }
