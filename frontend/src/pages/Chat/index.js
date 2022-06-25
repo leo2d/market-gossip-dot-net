@@ -20,6 +20,7 @@ const Chat = () => {
   const MESSAGES_LIMIT = 50;
   const MESSAGE_EVENT = "SendMessage";
   const COMMAND_EVENT = "SendCommand";
+  const JOINED_EVENT = "SendWelcomeGreetings";
 
   useEffect(() => {
     const newConnection = new HubConnectionBuilder()
@@ -40,10 +41,18 @@ const Chat = () => {
           hubConnection.on("ReceiveMessage", (message) => {
             setMessages((messages) => manageMessages(messages, message));
           });
+
+          hubConnection.send(JOINED_EVENT, {
+            id: `${Math.random()}`,
+            author: user.username,
+            text: '',
+            sentAt: new Date(),
+          })
+            .catch((er) => console.log("Joined event failed: ", er));
         })
         .catch((e) => console.log("Connection failed: ", e));
     }
-  }, [hubConnection]);
+  }, [hubConnection, user]);
 
   const manageMessages = (currentMessages, newMesage) => {
     const message = { ...newMesage, sentAt: formatDateToLT(newMesage.sentAt) };
@@ -66,6 +75,7 @@ const Chat = () => {
         author: user.username,
         text: message,
         sentAt: new Date(),
+        authorColor: user.userColor
       };
 
       if (hubConnection.state === "Connected") {

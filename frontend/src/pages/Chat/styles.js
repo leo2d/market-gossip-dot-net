@@ -23,5 +23,5 @@ export const ChatSquare = styled.div`
   overflow-x: auto;
   text-align: justify;
 
-  background-color: #09242b;
+  background-color: #23272A;
 `;

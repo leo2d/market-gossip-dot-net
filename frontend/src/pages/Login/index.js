@@ -28,8 +28,12 @@ const Login = () => {
     console.log('response -> ', response);
     const { username, email } = userData;
 
+    const colors = ['#7BC0A3', '#E8E9A1', '#FD7E89', '#E6B566', '#FFFFC2', '#CBAF87', '#FABEA7', '#FFCFDF'];
+    const userColor = colors[Math.floor(Math.random() * colors.length)];
+
+
     if (token && username) {
-      Auth.authenticate({ username, email }, token);
+      Auth.authenticate({ username, email, userColor }, token);
       history.push('/chat');
     }
   };

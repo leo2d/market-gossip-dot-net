@@ -8,8 +8,7 @@ export const Container = styled.div`
   padding: 3px;
   border-radius: 10px;
 
-  background-color: ${props =>
-    props.owner ? '#56D2B0' : props.botMessage ? '#575fcf' : '#fff'};
+  background-color: ${props => props.customColor };
 `;
 
 export const AuthorContainer = styled.div`
@@ -19,11 +18,10 @@ export const AuthorContainer = styled.div`
 `;
 
 export const Author = styled.span`
-  font-style: italic;
   font-weight: bold;
   font-size: 14px;
 
-  color: ${props => (props.botMessage ? '#FFF' : 'black')};
+  color: ${props => props.customColor};
 `;
 
 export const MessageContainer = styled.div`
@@ -33,9 +31,11 @@ export const MessageContainer = styled.div`
 
 export const MessageText = styled.span`
   font-size: 12px;
+  font-weight: 600;
+  color: ${props => props.systemMessage ? '#97A9B4' : '#FFFFFF'};
 `;
 export const MessageDate = styled.span`
   margin-left: 2px;
   font-size: 10px;
-  color: #09242b;
+  color: #97A9B4;
 `;
