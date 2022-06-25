@@ -20,7 +20,22 @@ public class ChatHub : Hub<IChatClient>
     public ChatHub(IMediator mediator)
     {
         _mediator = mediator;
-        _chatBot = new ChatBot(AppConstants.ChatBotName, new[] {"stock"});
+        _chatBot = new ChatBot(AppConstants.ChatBotName, new[] { "stock" });
+    }
+
+    public async Task SendWelcomeGreetings(ChatMessage message)
+    {
+        var systemMessage = message with
+        {
+            Author = AppConstants.SystemSenderName,
+            Text = $"{message.Author} joined the room"
+        };
+
+        await Clients.All.ReceiveMessage(systemMessage);
+
+        var welcomeMessage = $"Welcome {message.Author}! I'm {_chatBot.Name} and I'm here to help";
+
+        await Clients.Caller.ReceiveMessage(CreateBotMessage(welcomeMessage));
     }
 
     public async Task SendMessage(ChatMessage message)
@@ -32,7 +47,7 @@ public class ChatHub : Hub<IChatClient>
     {
         if (!_chatBot.IsAValidCommand(ChatCommandHelper.GetCommandFromMessage(message.Text)))
         {
-            await Clients.All.ReceiveMessage(CreateBotMessage("Invalid Command =| "));
+            await Clients.Caller.ReceiveMessage(CreateBotMessage("Invalid Command =| ", BotMessageType.Error));
             return;
         }
 
@@ -42,19 +57,22 @@ public class ChatHub : Hub<IChatClient>
 
         if (result.IsFailure)
         {
-            await Clients.All.ReceiveMessage(CreateBotMessage(result.Error));
+            await Clients.Caller.ReceiveMessage(CreateBotMessage(result.Error, BotMessageType.Error));
             return;
         }
 
+        //if the command is wrong we only send the message to the user who sent it
+        //if it is correct we sent the message to the room
         await Clients.All.ReceiveMessage(
             CreateBotMessage("Command Received, I'll be back soon with the results . . ."));
     }
 
-    private ChatMessage CreateBotMessage(string text) => new()
+    private BotMessage CreateBotMessage(string text, string type = BotMessageType.Regular) => new()
     {
         Text = text,
         Author = _chatBot.Name,
         SentAt = DateTime.Now,
-        Id = Guid.NewGuid().ToString()
+        Id = Guid.NewGuid().ToString(),
+        Type = type
     };
 }
