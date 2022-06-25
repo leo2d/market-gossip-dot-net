@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { AuthContainer } from './styles';
 import Api from '../../services/api';
 import Auth from '../../utils/auth';
 import AuthForm from '../../components/AuthForm';
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Login = () => {
   const history = useHistory();
@@ -17,11 +18,9 @@ const Login = () => {
 
   const [isLogin, setIsLogin] = useState(true);
 
-  useEffect(() => {
-    window.document.title = isLogin
-      ? 'Log In - Market Gossip'
-      : 'Sign Up - Market Gossip';
-  });
+  usePageTitle(isLogin
+    ? 'Log In - Market Gossip'
+    : 'Sign Up - Market Gossip');
 
   const onResponseSuccess = response => {
     const token = response.data?.token;
