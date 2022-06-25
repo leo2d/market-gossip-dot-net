@@ -9,8 +9,12 @@ import Auth from "../../utils/auth";
 import serverURL from "../../serverUrl";
 import { isCommand } from "../../utils/commandUtils";
 import { formatDateToLT } from "../../utils/dateUtils";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Chat = () => {
+
+  usePageTitle('Chat - Market Gossip');
+
   const [user] = useState(Auth.getUserData().user);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
