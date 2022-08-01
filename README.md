@@ -30,7 +30,7 @@
 
 A RabbitMQ instance is necessary to run the backend services. It is possible to easy set one with docker using the following command:
 
- __docker run -d --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 --name mkt-gossip-rabbit rabbitmq:3-management__
+    docker run -d --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 --name mkt-gossip-rabbit rabbitmq:3-management
 
 *If your RabbitMq config is different from the command above, you'll need to update the connection info in the appsettings.json on both ChatApp and Worker
 
